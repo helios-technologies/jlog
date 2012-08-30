@@ -84,7 +84,7 @@
  */
 function Log(level,logger,prefix) {
        var _currentLevel = Log.WARN;
-       var _logger = Log.writeLogger; // default to write Logger
+       var _logger = Log.consoleLogger; // default to console Logger
        var _prefix = false;
        /**
         * Sets the current logger prefix
@@ -222,64 +222,8 @@ Log.consoleLogger = function(msg,level,obj) {
   if (window.console) {
     window.console.log(level+" - "+msg);
   } else {
-    Log.popupLogger(msg,level,obj);
+    Log.alertLogger(msg,level,obj);
   }
-}
-
-
-/**
- * Static popup logger method.  This logger will popup a new window (if necessary), and add the log message to the end of a list.
- * @param {String} msg The message to display
- * @param level The priority level of this log event
- * @param {Log} obj The originating {@link Log} object.
- */
-Log.popupLogger = function(msg,level,obj) {
-       if (obj.popupBlocker) {
-  return;
-       }
-       if (!obj._window || !obj._window.document) {
-               obj._window = window.open("",'logger_popup_window','width=420,height=320,scrollbars=1,status=0,toolbars=0,resizable=1');
-               if (!obj._window) { obj.popupBlocker=true; alert("You have a popup window manager blocking the log4js log popup display.\n\nThis must be disabled to properly see logged events."); return; }
-         if (!obj._window.document.getElementById('loggerTable')) {
-                       obj._window.document.writeln("<table width='100%' id='loggerTable'><tr><th align='left'>Time</th><th width='100%' colspan='2' align='left'>Message</th></tr></table>");
-                       obj._window.document.close();
-               }
-       }
-       var tbl = obj._window.document.getElementById("loggerTable");
-       var row = tbl.insertRow(-1);
-
-       var cell_1 = row.insertCell(-1);
-       var cell_2 = row.insertCell(-1);
-       var cell_3 = row.insertCell(-1);
-
-       var d = new Date();
-       var h = d.getHours();
-       if (h<10) { h="0"+h; }
-       var m = d.getMinutes();
-       if (m<10) { m="0"+m; }
-       var s = d.getSeconds();
-       if (s<10) { s="0"+s; }
-       var date = (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear()+"&nbsp;-&nbsp;"+h+":"+m+":"+s;
-
-       cell_1.style.fontSize="8pt";
-       cell_1.style.fontWeight="bold";
-       cell_1.style.paddingRight="6px";
-
-       cell_2.style.fontSize="8pt";
-
-       cell_3.style.fontSize="8pt";
-       cell_3.style.whiteSpace="nowrap";
-       cell_3.style.width="100%";
-
-       if (tbl.rows.length % 2 == 0) {
-        cell_1.style.backgroundColor="#eeeeee";
-        cell_2.style.backgroundColor="#eeeeee";
-        cell_3.style.backgroundColor="#eeeeee";
-       }
-
-       cell_1.innerHTML=date
-       cell_2.innerHTML=level;
-       cell_3.innerHTML=msg;
 }
 
 /**
