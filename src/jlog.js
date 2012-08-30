@@ -21,21 +21,12 @@
  *     &lt;script&gt;
  *        // Setup log objects
  *        //
- *        //  log object of priority debug and the popup logger
- *        var log = new Log(Log.DEBUG, Log.popupLogger);
- *        //  log object of priority warn and the alert logger
- *        var log2 = new Log(Log.WARN, Log.alertLogger);
  *        //  log object of priority debug and the console logger (Safari)
- *        var log3 = new Log(Log.DEBUG, Log.consoleLogger);
+ *        var log3 = new JLog(JLog.DEBUG, JLog.consoleLogger);
  *
- *        log.debug('foo1');     // will popup a new window and log 'foo'
- *        log.warn('bar1');      // will add a new 'bar' message to the popup
- *        log2.debug('foo2');    // will do nothing (Log object's priority threshold is WARN)
- *        log2.warn('bar2');     // will display a javascript alert with the string 'bar'
  *        log3.debug('foo3');    // will log message to Safari console or existing popup
  *        log3.warn('bar3');     // same
  *
- *        log.info(Log.dumpObject(new Array('apple','pear','orange','banana')));
  *     &lt;/script&gt;
  *  &lt;/body&gt;
  * &lt;/html&gt;
@@ -69,10 +60,15 @@
  * 0.2  - Added consoleLogger for Safari
  *    - Changed popupLogger so that it only notifies once (or twice)
  *      that a popup blocker is active.
- *    - Added Log.NONE level for silencing all logging
+ *    - Added JLog.NONE level for silencing all logging
  * </pre>
  */
 
+
+// TODO
+// - prefix -> scope/name
+// - remove constructor level
+// - make a good way to dump an object
 
 
 /**
@@ -82,93 +78,135 @@
  * @param level The cut-off logger level.  You can adjust this level in the constructor and leave all other logging events in place.  Defaults to {@link Log#WARN}.
  * @param logger The logger to use.  The logger is a function that accepts the logging events and informs the user or developer. Defaults to {@link Log#writeLogger}.
  */
-function Log(level,logger,prefix) {
-       var _currentLevel = Log.WARN;
-       var _logger = Log.consoleLogger; // default to console Logger
-       var _prefix = false;
-       /**
+function JLog(level, logger, prefix) {
+        var _currentLevel = JLog.WARN;
+        var _logger = JLog.consoleLogger; // default to console Logger
+        var _prefix = false;
+
+        /**
         * Sets the current logger prefix
         * @param {String} prefix This prefix will be prepended to all messages.
         */
-       this.setPrefix = function(pre) {
-           if (pre!='undefined') { _prefix = pre; }
-     else { _prefix = false; }
-       }
-       /**
+        this.setPrefix = function(pre) {
+          _prefix = pre ? pre : false;
+        };
+
+        /**
         * Sets the current logger function
         * @param logger The function that will be called when a log event needs to be displayed
         */
-       this.setLogger = function(logger) {
-           if (logger!='undefined') { _logger = logger; }
-       }
+        this.setLogger = function(logger) {
+          if (logger) {
+            _logger = logger;
+          }
+        };
 
-       /**
+        /**
         * Sets the current threshold log level for this Log instance.  Only events that have a priority of this level or greater are logged.
         * @param level The new threshold priority level for logging events.  This can be one of the static members {@link Log#DEBUG},  {@link Log#INFO}, {@link Log#WARN}, {@link Log#ERROR}, {@link Log#FATAL}, {@link Log#NONE}, or it can be one of the strings ["debug", "info", "warn", "error", "fatal", "none"].
         */
-       this.setLevel = function(level) {
-           if (level!='undefined' && typeof level =='number') {
-                   _currentLevel = level;
-           } else if (level!='undefined') {
-                   if (level=='debug') { _currentLevel = Log.DEBUG; }
-                   else if (level=='info') { _currentLevel = Log.INFO; }
-                   else if (level=='error') { _currentLevel = Log.ERROR; }
-                   else if (level=='fatal') { _currentLevel = Log.FATAL; }
-                   else if (level=='warn') { _currentLevel = Log.WARN; }
-                   else { _currentLevel = Log.NONE; }
-           }
-       }
+        this.setLevel = function(level) {
+          if (level && typeof level === 'number') {
+            _currentLevel = level;
+          } else if (level) {
+            switch(level) {
+              case 'debug': _currentLevel = JLog.DEBUG; break;
+              case 'info': _currentLevel = JLog.INFO; break;
+              case 'error': _currentLevel = JLog.ERROR; break;
+              case 'fatal': _currentLevel = JLog.FATAL; break;
+              case 'warn': _currentLevel = JLog.WARN; break;
+              default: _currentLevel = JLog.NONE;
+            }
+          }
+        };
 
-       /**
+        /**
         * Gets the current prefix
-  * @return current prefix
-  */
+        * @return current prefix
+        */
+        this.getPrefix = function() {
+          return _prefix;
+        };
 
-       this.getPrefix = function() { return _prefix; }
-
-       /**
+        /**
         * Gets the current event logger function
-  * @return current logger
-  */
+        * @return current logger
+        */
+        this.getLogger = function() {
+          return _logger;
+        };
 
-       this.getLogger = function() { return _logger; }
-
-       /**
+        /**
         * Gets the current threshold priority level
-  * @return current level
-  */
+        * @return current level
+        */
 
-       this.getLevel = function() { return _currentLevel; }
+        this.getLevel = function() {
+          return _currentLevel;
+        };
 
-       if (level!='undefined') { this.setLevel(level); }
-       if (logger!='undefined') { this.setLogger(logger); }
-       if (prefix!='undefined') { this.setPrefix(prefix); }
-}
+        if (level) {
+          this.setLevel(level);
+        };
+
+        if (logger) {
+          this.setLogger(logger);
+        };
+
+        if (prefix) {
+          this.setPrefix(prefix);
+        };
+};
+
 /**
  * Log an event with priority of "debug"
  * @param s the log message
  */
-Log.prototype.debug     = function(s) { if (this.getLevel()<=Log.DEBUG) { this._log(s,"DEBUG",this); } }
+JLog.prototype.debug = function(s) {
+  if (this.getLevel() <= JLog.DEBUG) {
+    this._log(s, "DEBUG", this);
+  };
+};
+
 /**
  * Log an event with priority of "info"
  * @param s the log message
  */
-Log.prototype.info      = function(s) { if (this.getLevel()<=Log.INFO ) { this._log(s,"INFO",this); } }
+JLog.prototype.info = function(s) {
+  if (this.getLevel() <= JLog.INFO) {
+    this._log(s, "INFO", this);
+  };
+};
+
 /**
  * Log an event with priority of "warn"
  * @param s the log message
  */
-Log.prototype.warn      = function(s) { if (this.getLevel()<=Log.WARN ) { this._log(s,"WARN",this); } }
+JLog.prototype.warn = function(s) {
+  if (this.getLevel() <= JLog.WARN) {
+    this._log(s, "WARN", this);
+  };
+};
+
 /**
  * Log an event with priority of "error"
  * @param s the log message
  */
-Log.prototype.error     = function(s) { if (this.getLevel()<=Log.ERROR) { this._log(s,"ERROR",this); } }
+JLog.prototype.error = function(s) {
+  if (this.getLevel() <= JLog.ERROR) {
+    this._log(s, "ERROR", this);
+  };
+};
+
 /**
  * Log an event with priority of "fatal"
  * @param s the log message
  */
-Log.prototype.fatal     = function(s) { if (this.getLevel()<=Log.FATAL) { this._log(s,"FATAL",this); } }
+JLog.prototype.fatal = function(s) {
+  if (this.getLevel() <= JLog.FATAL) {
+    this._log(s, "FATAL", this);
+  };
+};
 
 /**
  * _log is the function that actually calling the configured logger function.
@@ -181,35 +219,20 @@ Log.prototype.fatal     = function(s) { if (this.getLevel()<=Log.FATAL) { this._
  * @param level The priority level of this log event
  * @param {Log} obj The originating {@link Log} object.
  */
-Log.prototype._log = function(msg,level,obj) {
+JLog.prototype._log = function(msg, level, obj) {
   if (this.getPrefix()) {
-    this.getLogger()(this.getPrefix()+" - "+msg,level,obj);
+    this.getLogger()(this.getPrefix() + ": " + msg, level, obj);
   } else {
-    this.getLogger()(msg,level,obj);
-  }
+    this.getLogger()(msg, level, obj);
+  };
+};
 
-}
-
-Log.DEBUG       = 1;
-Log.INFO        = 2;
-Log.WARN        = 3;
-Log.ERROR       = 4;
-Log.FATAL       = 5;
-Log.NONE    = 6;
-
-/**
- * Static alert logger method.  This logger will display a javascript alert (messagebox) with the message.
- * @param {String} msg The message to display
- * @param level The priority level of this log event
- */
-Log.alertLogger = function(msg,level) { alert(level+" - "+msg); }
-/**
- * Static write logger method.  This logger will print the message out to the web page using document.writeln.
- * @param {String} msg The message to display
- * @param level The priority level of this log event
- */
-Log.writeLogger = function(msg,level) { document.writeln(level+"&nbsp;-&nbsp;"+msg+"<br/>"); }
-
+JLog.DEBUG  = 1;
+JLog.INFO   = 2;
+JLog.WARN   = 3;
+JLog.ERROR  = 4;
+JLog.FATAL  = 5;
+JLog.NONE   = 6;
 
 /**
  * Static Safari WebKit console logger method. This logger will write messages to the Safari javascript console, if available.
@@ -218,34 +241,8 @@ Log.writeLogger = function(msg,level) { document.writeln(level+"&nbsp;-&nbsp;"+m
  * @param level The priority level of this log event
  * @param {Log} obj The originating {@link Log} object.
  */
-Log.consoleLogger = function(msg,level,obj) {
+JLog.consoleLogger = function(msg,level,obj) {
   if (window.console) {
-    window.console.log(level+" - "+msg);
-  } else {
-    Log.alertLogger(msg,level,obj);
-  }
-}
-
-/**
- * This method is a utility function that takes an object and creates a string representation of it's members.
- * @param {Object} the Object that you'd like to see
- * @return {String} a String representation of the object passed
- */
-Log.dumpObject=function (obj,indent) {
-  if (!indent) { indent="";}
-  if (indent.length>20) { return ; } // don't go too far...
-  var s="{\n";
-    for (var p in obj) {
-      s+=indent+p+":";
-      var type=typeof(obj[p]);
-      type=type.toLowerCase();
-      if (type=='object') {
-        s+= Log.dumpObject(obj[p],indent+"----");
-      } else {
-        s+= obj[p];
-      }
-      s+="\n";
-    }
-    s+=indent+"}";
-    return s;
-}
+    window.console.log(level + " - " + msg);
+  };
+};
