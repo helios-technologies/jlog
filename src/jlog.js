@@ -205,14 +205,13 @@ JLog.prototype.fatal = function(s) {
  * @private
  * @param {String} msg The message to display
  * @param level The priority level of this log event
- * @param {Log} obj The originating {@link Log} object.
  */
-JLog.prototype._log = function(msg, level, obj) {
-  if (this.getName()) {
-    this.getAppender()(this.getName() + ": " + msg, level, obj);
-  } else {
-    this.getAppender()(msg, level, obj);
-  };
+JLog.prototype._log = function(msg, level) {
+  var name = this.getName(),
+      namePrefix = name ? name + ': ' : '',
+      msgString = level + ' - ' + namePrefix + msg;
+
+  this.getAppender()(msgString);
 };
 
 JLog.DEBUG  = 1;
@@ -227,10 +226,9 @@ JLog.NONE   = 6;
  * If this browser doesn't have a javascript console (IE/Moz), then it degrades gracefully to {@link Log#popupLogger}
  * @param {String} msg The message to display
  * @param level The priority level of this log event
- * @param {Log} obj The originating {@link Log} object.
  */
-JLog.consoleAppender = function(msg, level, obj) {
+JLog.consoleAppender = function(msg) {
   if (window.console) {
-    window.console.log(level + " - " + msg);
+    window.console.log(msg);
   };
 };
