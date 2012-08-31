@@ -65,8 +65,12 @@ function JLog(name) {
 
   // Sets the current threshold log level for this Log instance.  Only events that have a priority of this level or greater are logged.
   this.setLevel = function(level) {
-    if (level && typeof level === 'number') {
-      _currentLevel = level;
+    if (typeof level === 'number') {
+      if (level >= JLog.ALL && level <= JLog.NONE) {
+        _currentLevel = level;
+      } else {
+        _currentLevel = JLog.NONE;
+      }
     } else if (level) {
       switch(level) {
         case 'all': _currentLevel = JLog.ALL; break;
@@ -78,6 +82,8 @@ function JLog(name) {
         case 'none': // fall through to default
         default: _currentLevel = JLog.NONE;
       }
+    } else {
+      _currentLevel = JLog.NONE;
     }
   };
 
