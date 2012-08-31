@@ -13,6 +13,14 @@
       logger.warn('HELLO WORLD');
 
       logger.warn('trying to log', 'several strings', 'at the same time');
+      logger.warn('trying to log an object', {
+        key1: 'value1',
+        key2: 'value2'
+      });
+      logger.warn({
+        logging: 'object',
+        by: 'itself'
+      });
     </script>
   </body>
 </html>

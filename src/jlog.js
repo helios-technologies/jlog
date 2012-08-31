@@ -123,10 +123,16 @@ JLog.prototype.fatal = function() {
 JLog.prototype._log = function() {
   var level = arguments[0],
       args = Array.prototype.slice.call(arguments[1]),
-      name = this.getName(),
-      namePrefix = name ? name + ': ' : '',
-      msgString = level + ' - ' + namePrefix + args.join(', ');
+      namePrefix = this.getName() ? this.getName() + ': ' : '',
+      msgString = level + ' - ' + namePrefix;
 
+  for (var i in args) {
+    if (typeof args[i] === 'object') {
+      args[i] = JSON.stringify(args[i]);
+    }
+  }
+
+  msgString += args.join(', ');
   this.getAppender()(msgString);
 };
 
