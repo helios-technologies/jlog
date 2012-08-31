@@ -36,7 +36,7 @@
 // - make a good way to dump an object
 
 function JLog(name) {
-  var _currentLevel = JLog.WARN,
+  var _currentLevel = JLog.ALL,
       _appender = JLog.consoleAppender,
       _name = null,
       _enabled = true;
@@ -69,11 +69,13 @@ function JLog(name) {
       _currentLevel = level;
     } else if (level) {
       switch(level) {
+        case 'all': _currentLevel = JLog.ALL; break;
         case 'debug': _currentLevel = JLog.DEBUG; break;
         case 'info': _currentLevel = JLog.INFO; break;
         case 'error': _currentLevel = JLog.ERROR; break;
         case 'fatal': _currentLevel = JLog.FATAL; break;
         case 'warn': _currentLevel = JLog.WARN; break;
+        case 'none': // fall through to default
         default: _currentLevel = JLog.NONE;
       }
     }
@@ -96,6 +98,7 @@ function JLog(name) {
   }
 };
 
+JLog.ALL    = 0;
 JLog.DEBUG  = 1;
 JLog.INFO   = 2;
 JLog.WARN   = 3;
