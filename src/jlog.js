@@ -38,8 +38,7 @@
 function JLog(name) {
         var _currentLevel = JLog.WARN,
             _appender = JLog.consoleAppender,
-            _name = null,
-            _enabled = true;
+            _name = null;
 
         this.setName = function(name) {
           _name = name || null;
@@ -84,50 +83,52 @@ function JLog(name) {
         };
 };
 
-JLog.prototype.debug = function(s) {
-  if (this.getLevel() <= JLog.DEBUG) {
-    this._log(s, "DEBUG", this);
-  };
-};
-
-JLog.prototype.info = function(s) {
-  if (this.getLevel() <= JLog.INFO) {
-    this._log(s, "INFO", this);
-  };
-};
-
-JLog.prototype.warn = function(s) {
-  if (this.getLevel() <= JLog.WARN) {
-    this._log(s, "WARN", this);
-  };
-};
-
-JLog.prototype.error = function(s) {
-  if (this.getLevel() <= JLog.ERROR) {
-    this._log(s, "ERROR", this);
-  };
-};
-
-JLog.prototype.fatal = function(s) {
-  if (this.getLevel() <= JLog.FATAL) {
-    this._log(s, "FATAL", this);
-  };
-};
-
-JLog.prototype._log = function(msg, level) {
-  var name = this.getName(),
-      namePrefix = name ? name + ': ' : '',
-      msgString = level + ' - ' + namePrefix + msg;
-
-  this.getAppender()(msgString);
-};
-
 JLog.DEBUG  = 1;
 JLog.INFO   = 2;
 JLog.WARN   = 3;
 JLog.ERROR  = 4;
 JLog.FATAL  = 5;
 JLog.NONE   = 6;
+
+JLog.prototype.debug = function() {
+  if (this.getLevel() <= JLog.DEBUG) {
+    this._log("DEBUG", arguments);
+  };
+};
+
+JLog.prototype.info = function() {
+  if (this.getLevel() <= JLog.INFO) {
+    this._log("INFO", arguments);
+  };
+};
+
+JLog.prototype.warn = function() {
+  if (this.getLevel() <= JLog.WARN) {
+    this._log("WARN", arguments);
+  };
+};
+
+JLog.prototype.error = function() {
+  if (this.getLevel() <= JLog.ERROR) {
+    this._log("ERROR", arguments);
+  };
+};
+
+JLog.prototype.fatal = function() {
+  if (this.getLevel() <= JLog.FATAL) {
+    this._log("FATAL", arguments);
+  };
+};
+
+JLog.prototype._log = function() {
+  var level = arguments[0],
+      args = Array.prototype.slice.call(arguments[1]),
+      name = this.getName(),
+      namePrefix = name ? name + ': ' : '',
+      msgString = level + ' - ' + namePrefix + args.join(', ');
+
+  this.getAppender()(msgString);
+};
 
 JLog.consoleAppender = function(msg) {
   if (window.console) {
