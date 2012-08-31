@@ -66,10 +66,7 @@
 
 
 // TODO
-// - prefix -> scope/name
-// - remove constructor level
 // - make a good way to dump an object
-
 
 /**
  * Create a new logger
@@ -78,26 +75,26 @@
  * @param level The cut-off logger level.  You can adjust this level in the constructor and leave all other logging events in place.  Defaults to {@link Log#WARN}.
  * @param logger The logger to use.  The logger is a function that accepts the logging events and informs the user or developer. Defaults to {@link Log#writeLogger}.
  */
-function JLog(level, logger, prefix) {
+function JLog(name) {
         var _currentLevel = JLog.WARN;
-        var _logger = JLog.consoleLogger; // default to console Logger
-        var _prefix = false;
+        var _appender = JLog.consoleAppender; // default to console appender
+        var _name = null;
 
         /**
-        * Sets the current logger prefix
-        * @param {String} prefix This prefix will be prepended to all messages.
+        * Sets the current logger name
+        * @param {String} name This name will be prepended to all messages.
         */
-        this.setPrefix = function(pre) {
-          _prefix = pre ? pre : false;
+        this.setName = function(name) {
+          _name = name || null;
         };
 
         /**
         * Sets the current logger function
         * @param logger The function that will be called when a log event needs to be displayed
         */
-        this.setLogger = function(logger) {
-          if (logger) {
-            _logger = logger;
+        this.setAppender = function(appender) {
+          if (appender) {
+            _appender = appender;
           }
         };
 
@@ -121,40 +118,31 @@ function JLog(level, logger, prefix) {
         };
 
         /**
-        * Gets the current prefix
-        * @return current prefix
+        * Gets the current name
+        * @return current name
         */
-        this.getPrefix = function() {
-          return _prefix;
+        this.getName = function() {
+          return _name;
         };
 
         /**
-        * Gets the current event logger function
-        * @return current logger
+        * Gets the current event appender function
+        * @return current appender
         */
-        this.getLogger = function() {
-          return _logger;
+        this.getAppender = function() {
+          return _appender;
         };
 
         /**
         * Gets the current threshold priority level
         * @return current level
         */
-
         this.getLevel = function() {
           return _currentLevel;
         };
 
-        if (level) {
-          this.setLevel(level);
-        };
-
-        if (logger) {
-          this.setLogger(logger);
-        };
-
-        if (prefix) {
-          this.setPrefix(prefix);
+        if (name) {
+          this.setName(name);
         };
 };
 
@@ -220,10 +208,10 @@ JLog.prototype.fatal = function(s) {
  * @param {Log} obj The originating {@link Log} object.
  */
 JLog.prototype._log = function(msg, level, obj) {
-  if (this.getPrefix()) {
-    this.getLogger()(this.getPrefix() + ": " + msg, level, obj);
+  if (this.getName()) {
+    this.getAppender()(this.getName() + ": " + msg, level, obj);
   } else {
-    this.getLogger()(msg, level, obj);
+    this.getAppender()(msg, level, obj);
   };
 };
 
@@ -241,7 +229,7 @@ JLog.NONE   = 6;
  * @param level The priority level of this log event
  * @param {Log} obj The originating {@link Log} object.
  */
-JLog.consoleLogger = function(msg,level,obj) {
+JLog.consoleAppender = function(msg, level, obj) {
   if (window.console) {
     window.console.log(level + " - " + msg);
   };
