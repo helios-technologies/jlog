@@ -36,51 +36,64 @@
 // - make a good way to dump an object
 
 function JLog(name) {
-        var _currentLevel = JLog.WARN,
-            _appender = JLog.consoleAppender,
-            _name = null;
+  var _currentLevel = JLog.WARN,
+      _appender = JLog.consoleAppender,
+      _name = null,
+      _enabled = true;
 
-        this.setName = function(name) {
-          _name = name || null;
-        };
+  this.setName = function(name) {
+    _name = name || null;
+  };
 
-        this.setAppender = function(appender) {
-          if (appender) {
-            _appender = appender;
-          }
-        };
+  this.setAppender = function(appender) {
+    if (appender) {
+      _appender = appender;
+    }
+  };
 
-        // Sets the current threshold log level for this Log instance.  Only events that have a priority of this level or greater are logged.
-        this.setLevel = function(level) {
-          if (level && typeof level === 'number') {
-            _currentLevel = level;
-          } else if (level) {
-            switch(level) {
-              case 'debug': _currentLevel = JLog.DEBUG; break;
-              case 'info': _currentLevel = JLog.INFO; break;
-              case 'error': _currentLevel = JLog.ERROR; break;
-              case 'fatal': _currentLevel = JLog.FATAL; break;
-              case 'warn': _currentLevel = JLog.WARN; break;
-              default: _currentLevel = JLog.NONE;
-            }
-          }
-        };
+  this.turnOn = function() {
+    _enabled = true;
+  };
 
-        this.getName = function() {
-          return _name;
-        };
+  this.turnOff = function() {
+    _enabled = false;
+  };
 
-        this.getAppender = function() {
-          return _appender;
-        };
+  this.isOn = function() {
+    return _enabled;
+  };
 
-        this.getLevel = function() {
-          return _currentLevel;
-        };
+  // Sets the current threshold log level for this Log instance.  Only events that have a priority of this level or greater are logged.
+  this.setLevel = function(level) {
+    if (level && typeof level === 'number') {
+      _currentLevel = level;
+    } else if (level) {
+      switch(level) {
+        case 'debug': _currentLevel = JLog.DEBUG; break;
+        case 'info': _currentLevel = JLog.INFO; break;
+        case 'error': _currentLevel = JLog.ERROR; break;
+        case 'fatal': _currentLevel = JLog.FATAL; break;
+        case 'warn': _currentLevel = JLog.WARN; break;
+        default: _currentLevel = JLog.NONE;
+      }
+    }
+  };
 
-        if (name) {
-          this.setName(name);
-        };
+  this.getName = function() {
+    return _name;
+  };
+
+  this.getAppender = function() {
+    return _appender;
+  };
+
+  this.getLevel = function() {
+    return _currentLevel;
+  };
+
+  if (name) {
+    this.setName(name);
+  }
 };
 
 JLog.DEBUG  = 1;
@@ -93,51 +106,53 @@ JLog.NONE   = 6;
 JLog.prototype.debug = function() {
   if (this.getLevel() <= JLog.DEBUG) {
     this._log("DEBUG", arguments);
-  };
+  }
 };
 
 JLog.prototype.info = function() {
   if (this.getLevel() <= JLog.INFO) {
     this._log("INFO", arguments);
-  };
+  }
 };
 
 JLog.prototype.warn = function() {
   if (this.getLevel() <= JLog.WARN) {
     this._log("WARN", arguments);
-  };
+  }
 };
 
 JLog.prototype.error = function() {
   if (this.getLevel() <= JLog.ERROR) {
     this._log("ERROR", arguments);
-  };
+  }
 };
 
 JLog.prototype.fatal = function() {
   if (this.getLevel() <= JLog.FATAL) {
     this._log("FATAL", arguments);
-  };
+  }
 };
 
 JLog.prototype._log = function() {
-  var level = arguments[0],
-      args = Array.prototype.slice.call(arguments[1]),
-      namePrefix = this.getName() ? this.getName() + ': ' : '',
-      msgString = level + ' - ' + namePrefix;
+  if (this.isOn()) {
+    var level = arguments[0],
+        args = Array.prototype.slice.call(arguments[1]),
+        namePrefix = this.getName() ? this.getName() + ': ' : '',
+        msgString = level + ' - ' + namePrefix;
 
-  for (var i in args) {
-    if (typeof args[i] === 'object') {
-      args[i] = JSON.stringify(args[i]);
+    for (var i in args) {
+      if (typeof args[i] === 'object') {
+        args[i] = JSON.stringify(args[i]);
+      }
     }
-  }
 
-  msgString += args.join(', ');
-  this.getAppender()(msgString);
+    msgString += args.join(', ');
+    this.getAppender()(msgString);
+  }
 };
 
 JLog.consoleAppender = function(msg) {
   if (window.console) {
     window.console.log(msg);
-  };
+  }
 };

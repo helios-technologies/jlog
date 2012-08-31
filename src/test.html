@@ -21,6 +21,11 @@
         logging: 'object',
         by: 'itself'
       });
+
+      logger.turnOff();
+      logger.warn('this should not be logged');
+      logger.turnOn();
+      logger.warn('this should be logged');
     </script>
   </body>
 </html>
