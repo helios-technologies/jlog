@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>JLog Demo</title>
+  </head>
+  <body>
+    <p>This is a demo page for JLog (the lightweight JavaScript logger)</p>
+
+    <script src="src/jlog.js"></script>
+    <script>
+      var logger = new JLog('DEMO');
+      logger.warn('HELLO WORLD');
+
+      logger.warn('trying to log', 'several strings', 'at the same time');
+      logger.warn('trying to log an object', {
+        key1: 'value1',
+        key2: 'value2'
+      });
+      logger.warn({
+        logging: 'object',
+        by: 'itself'
+      });
+
+      logger.turnOff();
+      logger.warn('this should not be logged');
+      logger.turnOn();
+      logger.warn('this should be logged');
+    </script>
+  </body>
+</html>
