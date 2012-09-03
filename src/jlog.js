@@ -32,12 +32,9 @@
  * </pre>
  */
 
-// TODO
-// - make a good way to dump an object
-
 function JLog(name) {
   var _currentLevel = JLog.ALL,
-      _appender = JLog.consoleAppender,
+      _appenders = [new JLog.ConsoleAppender],
       _name = null,
       _enabled = true;
 
@@ -45,10 +42,19 @@ function JLog(name) {
     _name = name || null;
   };
 
-  this.setAppender = function(appender) {
+  this.addAppender = function(appender) {
     if (appender) {
-      _appender = appender;
+      _appenders.push(appender);
     }
+  };
+
+  this.removeAppender = function(name) {
+    for (var i in _appenders) {
+      if (_appenders[i].name === name) {
+        _appenders.splice(i, 1);
+      }
+    }
+    return null;
   };
 
   this.turnOn = function() {
@@ -91,8 +97,17 @@ function JLog(name) {
     return _name;
   };
 
-  this.getAppender = function() {
-    return _appender;
+  this.getAppender = function(name) {
+    for (var i in _appenders) {
+      if (_appenders[i].name === name) {
+        return _appenders[i];
+      }
+    }
+    return null;
+  };
+
+  this.getAppenders = function() {
+    return _appenders;
   };
 
   this.getLevel = function() {
@@ -147,7 +162,8 @@ JLog.prototype._log = function() {
     var level = arguments[0],
         args = Array.prototype.slice.call(arguments[1]),
         namePrefix = this.getName() ? this.getName() + ': ' : '',
-        msgString = level + ' - ' + namePrefix;
+        msgString = level + ' - ' + namePrefix,
+        appenders = this.getAppenders();
 
     for (var i in args) {
       if (typeof args[i] === 'object') {
@@ -156,12 +172,20 @@ JLog.prototype._log = function() {
     }
 
     msgString += args.join(', ');
-    this.getAppender()(msgString);
+    for (var i in appenders) {
+      appenders[i].log(msgString);
+    }
   }
 };
 
-JLog.consoleAppender = function(msg) {
-  if (window.console) {
-    window.console.log(msg);
+JLog.ConsoleAppender = function() {
+  return {
+    name: 'ConsoleAppender',
+
+    log: function(msg) {
+      if (window.console) {
+        window.console.log(msg);
+      }
+    }
   }
 };
